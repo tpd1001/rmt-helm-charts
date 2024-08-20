@@ -3,6 +3,7 @@
 {{- $component := "app" -}}
 {{- $task := "sync" -}}
 {{- $image := .Values.app.image -}}
+{{- $volumeType := .Values.app.storage.volumeType -}}
 apiVersion: batch/v1
 kind: CronJob
 metadata:
@@ -48,12 +49,19 @@ spec:
                   name: {{ include "rmt.fullname" . }}-{{ $component }}
                   key: password
             volumeMounts:
-            - name: {{ include "rmt.fullname" . }}-{{ $component }}
+            - name: {{ include "rmt.fullname" . }}-{{ $component }}-{{ $volumeType }}
               mountPath: /var/lib/rmt
           volumes:
-          - name: {{ include "rmt.fullname" . }}-{{ $component }}
+          {{ if eq $volumeType "pvc" }}
+          - name: {{ include "rmt.fullname" . }}-{{ $component }}-{{ $volumeType }}
             persistentVolumeClaim:
               claimName: {{ include "rmt.fullname" . }}-{{ $component }}
+          {{- else }}
+          - name: {{ include "rmt.fullname" . }}-{{ $component }}-{{ $volumeType }}
+            nfs:
+              server: "fs-REDACTED.efs.eu-west-1.amazonaws.com"
+              path: "/"
+          {{- end }}
 ---
 {{- $component := "app" -}}
 {{- $task := "mirror" -}}
@@ -103,10 +111,18 @@ spec:
                   name: {{ include "rmt.fullname" . }}-{{ $component }}
                   key: password
             volumeMounts:
-            - name: {{ include "rmt.fullname" . }}-{{ $component }}
+            - name: {{ include "rmt.fullname" . }}-{{ $component }}-{{ $volumeType }}
               mountPath: /var/lib/rmt
           volumes:
-          - name: {{ include "rmt.fullname" . }}-{{ $component }}
+          volumes:
+          {{ if eq $volumeType "pvc" }}
+          - name: {{ include "rmt.fullname" . }}-{{ $component }}-{{ $volumeType }}
             persistentVolumeClaim:
               claimName: {{ include "rmt.fullname" . }}-{{ $component }}
+          {{- else }}
+          - name: {{ include "rmt.fullname" . }}-{{ $component }}-{{ $volumeType }}
+            nfs:
+              server: "fs-REDACTED.efs.eu-west-1.amazonaws.com"
+              path: "/"
+          {{- end }}
 {{- end }}
