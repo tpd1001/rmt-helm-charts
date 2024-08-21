@@ -1,13 +1,18 @@
+{{- $volumeType := .Values.app.storage.volumeType -}}
+{{ if eq $volumeType "pvc" }}
 ---
 {{- $component := "app" -}}
+{{- $accessMode := .Values.app.storage.accessMode -}}
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: {{ include "rmt.fullname" . }}-{{ $component }}
 spec:
   accessModes:
-    - ReadWriteOnce
+    - {{ $accessMode }}
   storageClassName: {{ .Values.app.storage.class }}
+  volumeMode: {{ .Values.app.storage.volumeMode }}
   resources:
     requests:
       storage: {{ .Values.app.storage.size }}
+{{ end }}

@@ -4,6 +4,8 @@
 {{- $initImage := .Values.app.init.image -}}
 {{- $autoscaling := .Values.app.autoscaling -}}
 {{- $replicaCount := .Values.app.replicaCount -}}
+{{- $strategy := .Values.app.strategy -}}
+{{- $volumeType := .Values.app.storage.volumeType -}}
 {{- $sccSync := .Values.app.scc -}}
 apiVersion: apps/v1
 kind: Deployment
@@ -20,6 +22,8 @@ spec:
     matchLabels:
       {{- include "rmt.selectorLabels" . | nindent 6 }}
       component: {{ $component }}
+  strategy:
+    type: {{ $strategy }}
   template:
     metadata:
       annotations:
@@ -99,16 +103,23 @@ spec:
           {{- end }}
         {{- end }}
         volumeMounts:
-        - name: {{ include "rmt.fullname" . }}-{{ $component }}-pv
+        - name: {{ include "rmt.fullname" . }}-{{ $component }}-{{ $volumeType }}
           mountPath: /var/lib/rmt
         {{- if not $sccSync.enabled }}
         - name: {{ include "rmt.fullname" . }}-{{ $component }}-entrypoint
           mountPath: /usr/local/bin
         {{- end }}
       volumes:
-      - name: {{ include "rmt.fullname" . }}-{{ $component }}-pv
+      {{ if eq $volumeType "pvc" }}
+      - name: {{ include "rmt.fullname" . }}-{{ $component }}-{{ $volumeType }}
         persistentVolumeClaim:
           claimName: {{ include "rmt.fullname" . }}-{{ $component }}
+      {{- else }}
+      - name: {{ include "rmt.fullname" . }}-{{ $component }}-{{ $volumeType }}
+        nfs:
+          server: "fs-REDACTED.efs.eu-west-1.amazonaws.com"
+          path: "/"
+      {{- end }}
       {{- if not $sccSync.enabled }}
       - name: {{ include "rmt.fullname" . }}-{{ $component }}-entrypoint
         configMap:

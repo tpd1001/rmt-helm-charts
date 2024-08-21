@@ -10,6 +10,7 @@ db:
     # Overrides the image tag whose default is the chart appVersion.
     # -- db image tag
     tag: "10.6"
+  strategy: RollingUpdate
   storage:
     class:
     # -- db storage volume space requirements
@@ -37,6 +38,7 @@ app:
       pullPolicy: Always
       # Overrides the image tag whose default is the chart appVersion.
       tag: "10.6"
+  strategy: RollingUpdate
   image:
     # -- RMT server image
     repository: registry.suse.com/suse/rmt-server
@@ -48,6 +50,9 @@ app:
     # -- mysql host to connect to (default target is db container)
     host:
   storage:
+    accessMode: ReadWriteOnce
+    volumeMode: Filesystem
+    volumeType: pvc
     class:
     # -- RMT server storage volume requirements. This can vary greatly depending on the number of modules to mirror.
     size: 300Mi
