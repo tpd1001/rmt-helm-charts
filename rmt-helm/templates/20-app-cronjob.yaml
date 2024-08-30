@@ -13,6 +13,9 @@ metadata:
     component: {{ $component }}
     task: {{ $task }}
 spec:
+  {{- if hasKey .Values.app.cronjob "suspend" }}
+  suspend: {{ .Values.app.cronjob.suspend }}
+  {{- end }}
   schedule: "{{ .Values.app.cronjob.sync.schedule }}"
   jobTemplate:
     spec:
@@ -75,6 +78,9 @@ metadata:
     component: {{ $component }}
     task: {{ $task }}
 spec:
+  {{- if hasKey .Values.app.cronjob "suspend" }}
+  suspend: {{ .Values.app.cronjob.suspend }}
+  {{- end }}
   schedule: "{{ .Values.app.cronjob.mirror.schedule }}"
   jobTemplate:
     spec:
