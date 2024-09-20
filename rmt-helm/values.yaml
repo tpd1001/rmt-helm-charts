@@ -10,6 +10,7 @@ db:
     # Overrides the image tag whose default is the chart appVersion.
     # -- db image tag
     tag: "10.6"
+  # -- db deployment update strategy used to replace old pods by new ones
   strategy: RollingUpdate
   storage:
     class:
@@ -38,6 +39,7 @@ app:
       pullPolicy: Always
       # Overrides the image tag whose default is the chart appVersion.
       tag: "10.6"
+  # -- RMT deployment update strategy used to replace old pods by new ones
   strategy: RollingUpdate
   image:
     # -- RMT server image
@@ -45,13 +47,16 @@ app:
     pullPolicy: Always
     # Overrides the image tag whose default is the chart appVersion.
     # -- RMT server image tag
-    tag: "2.17"
+    tag: "2.18"
   mysql:
     # -- mysql host to connect to (default target is db container)
     host:
   storage:
+    # -- RMT access mode for server storage volume. Cronjobs need simultaneous access to the storage.
     accessMode: ReadWriteOnce
+    # -- RMT server volume mode: Filesystem or Block
     volumeMode: Filesystem
+    # -- RMT server volume type: pvc or nfs (direct NFS mount)
     volumeType: pvc
     class:
     # -- RMT server storage volume requirements. This can vary greatly depending on the number of modules to mirror.
